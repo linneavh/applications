@@ -1,51 +1,46 @@
+pip install PyPDF2
+
 import openai
 from docx import Document
+import re
+import PyPDF2
 
 # Set up your OpenAI API key
 openai.api_key = 'YOUR_API_KEY'
 
 # Gather input
-descriptive_words = ["hardworking", "team player", "innovative", "dedicated", "detail-oriented"]
-recipient_name = "Recipient Name"
-job_title = "Your Job Title"
-company_name = "Company Name"
-is_unsolicited = True  # Change this based on the application type
+# (previous input variables remain the same)
 
-# Access Word documents for inspiration
-word_doc_1 = open("word_doc_1.docx", "rb")  # Replace with your file paths
-word_doc_2 = open("word_doc_2.docx", "rb")
-word_doc_3 = open("word_doc_3.docx", "rb")
-word_doc_4 = open("word_doc_4.docx", "rb")
+# Function to extract text from a PDF file
+def extract_text_from_pdf(pdf_path):
+    text = ""
+    with open(pdf_path, "rb") as pdf_file:
+        pdf_reader = PyPDF2.PdfFileReader(pdf_file)
+        num_pages = pdf_reader.numPages
+        for page_num in range(num_pages):
+            page = pdf_reader.getPage(page_num)
+            text += page.extractText()
+    return text
 
-# Read content from Word documents
-inspiration_text = ""
-for doc in [word_doc_1, word_doc_2, word_doc_3, word_doc_4]:
-    doc_content = Document(doc)
-    for paragraph in doc_content.paragraphs:
-        inspiration_text += paragraph.text + "\n"
+# Extract text from the PDF resume
+resume_pdf_path = "path/to/your/resume.pdf"  # Replace with your PDF file path
+resume_text = extract_text_from_pdf(resume_pdf_path)
+
+# Function to extract relevant sections from the resume text
+def extract_resume_sections(resume_text):
+    # ... (same as before, extract sections based on specific criteria)
+    # For illustration purposes, assuming sections are delineated by "\n" in the PDF text
+    return resume_text.split("\n\n")  # Split by double newline for sections
+
+# Extract relevant sections from the resume text
+resume_sections = extract_resume_sections(resume_text)
+
+# Choose specific parts of the resume to include in the cover letter (e.g., education or experience)
+# For illustration, let's include the first section of the resume
+if resume_sections:
+    resume_part_to_include = resume_sections[0]
+else:
+    resume_part_to_include = "No relevant resume sections found."
 
 # Prepare prompt for GPT-3
-application_type = "uopfordret" if is_unsolicited else "soliciteret"
-
-prompt = f"""Write a cover letter in Danish addressed to {recipient_name}.
-I am a {', '.join(descriptive_words)} individual.
-I am applying for the position of {job_title} at {company_name}.
-This application is {application_type}.
-Inspirations from previous cover letters:
-{inspiration_text}
-"""
-
-# Invoke GPT-3 API to generate text
-response = openai.Completion.create(
-    engine="text-davinci-003",
-    prompt=prompt,
-    max_tokens=400  # Adjust token count to fit approximately half a page
-)
-
-generated_text = response.choices[0].text.strip()
-
-# Create a new Word document and write the generated text
-output_doc = Document()
-output_doc.add_paragraph(generated_text)
-
-output_doc.save("generated_cover_letter.docx")
+# (rest of the code remains the same)
