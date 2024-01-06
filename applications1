@@ -1,0 +1,44 @@
+import openai
+from docx import Document
+
+# Set up your OpenAI API key
+openai.api_key = 'YOUR_API_KEY'
+
+# Gather input
+descriptive_words = ["hardworking", "team player", "innovative", "dedicated", "detail-oriented"]
+recipient_name = "Recipient Name"
+
+# Access Word documents for inspiration
+word_doc_1 = open("word_doc_1.docx", "rb")  # Replace with your file paths
+word_doc_2 = open("word_doc_2.docx", "rb")
+word_doc_3 = open("word_doc_3.docx", "rb")
+word_doc_4 = open("word_doc_4.docx", "rb")
+
+# Read content from Word documents
+inspiration_text = ""
+for doc in [word_doc_1, word_doc_2, word_doc_3, word_doc_4]:
+    doc_content = Document(doc)
+    for paragraph in doc_content.paragraphs:
+        inspiration_text += paragraph.text + "\n"
+
+# Prepare prompt for GPT-3
+prompt = f"""Write a cover letter in Danish addressed to {recipient_name}.
+I am a {', '.join(descriptive_words)} individual.
+Inspirations from previous cover letters:
+{inspiration_text}
+"""
+
+# Invoke GPT-3 API to generate text
+response = openai.Completion.create(
+    engine="text-davinci-003",
+    prompt=prompt,
+    max_tokens=400  # Adjust token count to fit approximately half a page
+)
+
+generated_text = response.choices[0].text.strip()
+
+# Create a new Word document and write the generated text
+output_doc = Document()
+output_doc.add_paragraph(generated_text)
+
+output_doc.save("generated_cover_letter.docx")
