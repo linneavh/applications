@@ -1,0 +1,41 @@
+import PyPDF2
+from docx import Document
+
+# Function to extract text from a PDF file
+def extract_text_from_pdf(pdf_path):
+    text = ""
+    with open(pdf_path, "rb") as pdf_file:
+        pdf_reader = PyPDF2.PdfFileReader(pdf_file)
+        num_pages = pdf_reader.numPages
+        for page_num in range(num_pages):
+            page = pdf_reader.getPage(page_num)
+            text += page.extractText()
+    return text
+
+# Function to create a Word document from extracted PDF text
+def create_word_document(pdf_text, output_path):
+    doc = Document()
+    doc.add_paragraph(pdf_text)
+
+    doc.save(output_path)
+
+# Path to your PDF file
+pdf_file_path = "path/to/your/file.pdf"  # Replace with your PDF file path
+
+# Extract text from the PDF file
+extracted_text = extract_text_from_pdf(pdf_file_path)
+
+# Convert extracted text to a Word document
+output_word_path = "output_document.docx"  # Output Word document path
+create_word_document(extracted_text, output_word_path)
+
+# Now you can commit and push the generated Word document to your GitHub repository
+# using Git commands or a Git Python library like GitPython
+# For example, you can use GitPython to commit and push the document:
+'''
+import git
+repo = git.Repo('path/to/your/repository')
+repo.git.add(output_word_path)
+repo.git.commit(m='Add converted Word document')
+repo.git.push()
+'''
